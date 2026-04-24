@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>B.Tech Visual Learning Hub</title>
+    <style>
+        /* --- CSS STYLING --- */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f7f6;
+            color: #333;
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 900px;
+            margin: 40px auto;
+            background: #fff;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        }
+        header {
+            text-align: center;
+            border-bottom: 2px solid #eaeaea;
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+        }
+        h1 { color: #2c3e50; margin-bottom: 5px; }
+        h2 { color: #34495e; border-bottom: 2px solid #3498db; display: inline-block; padding-bottom: 5px; }
+        
+        /* Grid for Topics */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+        }
+        .card {
+            background: #fff;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 20px;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 15px rgba(0,0,0,0.1);
+            border-color: #3498db;
+        }
+        .card h3 { margin-top: 0; color: #2980b9; }
+
+        /* Topic View */
+        .back-btn {
+            background: #95a5a6;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+        .back-btn:hover { background: #7f8c8d; }
+        
+        .illustration {
+            width: 100%;
+            max-height: 400px;
+            object-fit: cover;
+            border-radius: 8px;
+            margin: 20px 0;
+            border: 1px solid #ddd;
+        }
+
+        /* Quiz Section */
+        .quiz-section {
+            background: #fdfdfd;
+            border: 1px solid #eee;
+            padding: 25px;
+            border-radius: 8px;
+            margin-top: 40px;
+        }
+        .question-block {
+            margin-bottom: 20px;
+        }
+        .question-block p { font-weight: bold; margin-bottom: 10px; }
+        .options label {
+            display: block;
+            margin-bottom: 8px;
+            cursor: pointer;
+        }
+        .submit-btn {
+            background: #27ae60;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+        }
+        .submit-btn:hover { background: #2ecc71; }
+        
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 5px;
+            font-weight: bold;
+            display: none;
+        }
+        .result.success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>B.Tech Visual Learning Hub</h1>
+        <p>Master 2nd-year concepts through visual illustrations and interactive practice.</p>
+    </header>
+
+    <main id="app-content">
+        </main>
+</div>
+
+<script>
+    /* --- JAVASCRIPT LOGIC & MOCK DATA --- */
+
+    // 1. Mock Data (Replacing the MongoDB Database)
+    const database = [
+        {
+            id: 1,
+            subject: "Data Structures",
+            title: "Binary Trees & BSTs",
+            content: "A Binary Search Tree (BST) is a node-based binary tree data structure which has the following properties: The left subtree of a node contains only nodes with keys lesser than the node's key. The right subtree of a node contains only nodes with keys greater than the node's key. Both subtrees must also be binary search trees.",
+            imageUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/d/da/Binary_search_tree.svg/300px-Binary_search_tree.svg.png",
+            quizzes: [
+                {
+                    question: "In a true Binary Search Tree, where would you find the smallest element?",
+                    options: ["Root node", "Furthest right leaf", "Furthest left leaf", "It is random"],
+                    correctAnswer: "Furthest left leaf"
+                },
+                {
+                    question: "What is the maximum number of children a single node can have in a Binary Tree?",
+                    options: ["1", "2", "3", "Unlimited"],
+                    correctAnswer: "2"
+                }
+            ]
+        },
+        {
+            id: 2,
+            subject: "Computer Organization",
+            title: "CPU Fetch-Decode-Execute Cycle",
+            content: "The instruction cycle (also known as the fetch–decode–execute cycle) is the basic operation cycle of a computer. It is the process by which a computer retrieves a program instruction from its memory, determines what actions the instruction requires, and carries out those actions.",
+            imageUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c5/Instruction_cycle.svg/400px-Instruction_cycle.svg.png",
+            quizzes: [
+                {
+                    question: "Which component of the CPU is responsible for decoding the instruction?",
+                    options: ["ALU", "Control Unit", "Registers", "Cache"],
+                    correctAnswer: "Control Unit"
+                }
+            ]
+        }
+    ];
+
+    const appContent = document.getElementById('app-content');
+    let currentTopic = null;
+
+    // 2. Render Functions
+    function renderHome() {
+        currentTopic = null;
+        let html = `<h2>Available Modules</h2><div class="grid">`;
+        
+        database.forEach(topic => {
+            html += `
+                <div class="card" onclick="renderTopic(${topic.id})">
+                    <h3>${topic.subject}</h3>
+                    <p><strong>${topic.title}</strong></p>
+                    <p style="font-size: 13px; color: #777;">Click to start learning &rarr;</p>
+                </div>
+            `;
+        });
+        
+        html += `</div>`;
+        appContent.innerHTML = html;
+    }
+
+    function renderTopic(topicId) {
+        currentTopic = database.find(t => t.id === topicId);
+        
+        let html = `
+            <button class="back-btn" onclick="renderHome()">&larr; Back to Modules</button>
+            <h2>${currentTopic.subject}: ${currentTopic.title}</h2>
+            <img class="illustration" src="${currentTopic.imageUrl}" alt="Illustration for ${currentTopic.title}">
+            <p style="font-size: 1.1rem;">${currentTopic.content}</p>
+            
+            <div class="quiz-section">
+                <h3>Knowledge Check</h3>
+                <form id="quiz-form" onsubmit="handleQuizSubmit(event)">
+        `;
+
+        currentTopic.quizzes.forEach((quiz, index) => {
+            html += `
+                <div class="question-block">
+                    <p>Q${index + 1}: ${quiz.question}</p>
+                    <div class="options">
+            `;
+            quiz.options.forEach(option => {
+                html += `
+                    <label>
+                        <input type="radio" name="question${index}" value="${option}" required>
+                        ${option}
+                    </label>
+                `;
+            });
+            html += `</div></div>`;
+        });
+
+        html += `
+                    <button type="submit" class="submit-btn">Submit Answers</button>
+                </form>
+                <div id="quiz-result" class="result"></div>
+            </div>
+        `;
+
+        appContent.innerHTML = html;
+    }
+
+    // 3. Logic to Grade Quiz
+    function handleQuizSubmit(event) {
+        event.preventDefault(); // Prevent page reload
+        let score = 0;
+        const totalQuestions = currentTopic.quizzes.length;
+        const formData = new FormData(event.target);
+
+        currentTopic.quizzes.forEach((quiz, index) => {
+            const userAnswer = formData.get(`question${index}`);
+            if (userAnswer === quiz.correctAnswer) {
+                score++;
+            }
+        });
+
+        const resultDiv = document.getElementById('quiz-result');
+        resultDiv.style.display = 'block';
+        
+        if(score === totalQuestions) {
+            resultDiv.className = 'result success';
+            resultDiv.innerHTML = `🎉 Perfect! You scored ${score} out of ${totalQuestions}.`;
+        } else {
+            resultDiv.className = 'result success'; // using same style for simplicity
+            resultDiv.style.backgroundColor = '#fff3cd';
+            resultDiv.style.color = '#856404';
+            resultDiv.style.borderColor = '#ffeeba';
+            resultDiv.innerHTML = `Good try! You scored ${score} out of ${totalQuestions}. Review the text and try again!`;
+        }
+    }
+
+    // 4. Initialize the App
+    renderHome();
+
+</script>
+</body>
+</html>
